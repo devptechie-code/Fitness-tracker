@@ -1,7 +1,7 @@
 // State
 let userProfile = null;
 let userId = null;
-const API_BASE = "http://127.0.0.1:8000/api";
+const API_BASE = "https://b84a19acdd8cf0.lhr.life/api";
 
 // Elements
 const authOverlay = document.getElementById('authOverlay');
