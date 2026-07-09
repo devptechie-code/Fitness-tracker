@@ -1,0 +1,236 @@
+/* ==========================================================================
+   Fitness Tracker — Sports/Fitness Dark Theme
+   Powered by ui-ux-pro-max & hyperframes-css-animations
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #0f172a;
+  --fg: #f8fafc;
+  --card: #1e293b;
+  --card-fg: #f8fafc;
+  --primary: #14b8a6;
+  --primary-hover: #0d9488;
+  --accent: #8b5cf6;
+  --muted: #334155;
+  --muted-fg: #94a3b8;
+  --border: #334155;
+  --destructive: #ef4444;
+  --radius: 16px;
+  --font-body: 'Inter', sans-serif;
+  --font-head: 'Inter', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-body);
+  color: var(--fg);
+  background: var(--bg);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-head);
+  letter-spacing: -0.5px;
+  font-weight: 600;
+}
+
+button, input, select, textarea { font: inherit; }
+
+/* ==========================================================================
+   CSS ANIMATIONS (Stagger Patterns)
+   ========================================================================== */
+.stagger-in {
+  opacity: 0;
+  animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 80ms);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
+}
+
+/* ==========================================================================
+   MODALS / OVERLAYS (Auth & Onboarding)
+   ========================================================================== */
+.overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(31, 41, 55, 0.95); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px; overflow-y: auto;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.overlay.active { opacity: 1; pointer-events: auto; }
+
+.modal-card {
+  width: 100%; max-width: 500px;
+  background: var(--card); border-radius: var(--radius); padding: 32px;
+  border: 1px solid var(--border); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header { text-align: center; margin-bottom: 24px; }
+.modal-header h1 { font-size: 32px; color: var(--primary); }
+.modal-header p { color: var(--muted-fg); font-size: 16px; }
+
+.field-group { margin-bottom: 16px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+label { display: block; font-size: 14px; font-weight: 600; color: var(--muted-fg); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+input, select, textarea {
+  width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg); color: var(--fg); font-size: 16px;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--primary);
+}
+
+.btn {
+  width: 100%; padding: 12px 16px; border: none; border-radius: 8px;
+  background: var(--primary); color: #000; font-weight: 600; font-size: 16px;
+  cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3); }
+
+.btn-secondary { background: var(--muted); color: var(--fg); }
+.btn-secondary:hover { background: var(--border); }
+.btn-danger { background: var(--destructive); }
+.btn-danger:hover { filter: brightness(1.2); }
+
+.toggle-link {
+  display: block; text-align: center; margin-top: 16px; color: var(--primary);
+  cursor: pointer; font-weight: 600; text-decoration: underline;
+}
+
+.preg-toggle-box {
+  margin-top: 16px; padding: 16px; border: 1px dashed var(--primary); border-radius: 8px;
+  background: rgba(249, 115, 22, 0.05);
+}
+.preg-toggle-box label { display: flex; align-items: center; gap: 10px; color: var(--primary); font-size: 16px; margin: 0; cursor: pointer; }
+.preg-toggle-box input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--primary); }
+
+/* ==========================================================================
+   MAIN APP SHELL
+   ========================================================================== */
+.shell {
+  display: grid; grid-template-columns: 240px 1fr; min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  background: var(--card); border-right: 1px solid var(--border);
+  padding: 24px 16px; display: flex; flex-direction: column;
+}
+
+.sb-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+.sb-logo {
+  width: 40px; height: 40px; border-radius: 8px; display: grid; place-items: center;
+  background: var(--primary); color: #fff; font-weight: 700; font-size: 24px; font-family: var(--font-head);
+}
+.sb-brand h1 { font-size: 22px; margin: 0; line-height: 1; }
+
+.nav { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.nav button {
+  width: 100%; display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border: none; border-radius: 8px;
+  background: transparent; color: var(--muted-fg); font-weight: 500; font-size: 15px;
+  cursor: pointer; text-align: left; transition: all 0.2s;
+}
+.nav button:hover { background: var(--muted); color: var(--fg); }
+.nav button.active { background: var(--primary); color: #fff; }
+
+.profile-card {
+  margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px;
+}
+.avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; font-weight: 700; }
+.profile-info strong { display: block; font-size: 16px; }
+.profile-info span { font-size: 13px; color: var(--muted-fg); cursor: pointer; text-decoration: underline; }
+
+/* Content Area */
+.content { padding: 32px; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+.topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+.topbar h2 { font-size: 32px; color: var(--primary); }
+.topbar p { color: var(--muted-fg); font-size: 16px; }
+
+.pill { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+.pill-ok { background: rgba(20, 184, 166, 0.15); color: var(--primary); border: 1px solid rgba(20, 184, 166, 0.3); }
+
+/* Views */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ==========================================================================
+   DASHBOARD / PANELS
+   ========================================================================== */
+.grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+
+.kpi { text-align: center; }
+.kpi-label { font-size: 14px; color: var(--muted-fg); text-transform: uppercase; font-weight: 600; letter-spacing: 1px; }
+.kpi-val { font-size: 40px; font-weight: 700; color: var(--fg); font-family: var(--font-head); margin: 8px 0; }
+.kpi-sub { font-size: 13px; color: var(--accent); }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.card h3 { font-size: 22px; margin-bottom: 16px; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+
+/* Checklist */
+.checklist { display: flex; flex-direction: column; gap: 12px; }
+.check-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  cursor: pointer; transition: all 0.2s;
+}
+.check-item:hover { border-color: var(--primary); transform: translateX(4px); }
+.check-item input { width: 20px; height: 20px; accent-color: var(--primary); pointer-events: none; }
+.check-item.done { opacity: 0.5; background: transparent; }
+.check-item.done span { text-decoration: line-through; color: var(--muted-fg); }
+.check-item span { font-size: 15px; font-weight: 500; flex: 1; transition: color 0.2s; }
+
+/* ==========================================================================
+   CHAT & SETTINGS
+   ========================================================================== */
+.chat-window { display: flex; flex-direction: column; gap: 16px; height: 400px; overflow-y: auto; padding-right: 8px; margin-bottom: 16px; }
+.bubble { max-width: 80%; padding: 12px 16px; border-radius: 12px; font-size: 16px; }
+.bubble.bot { background: var(--muted); border-bottom-left-radius: 4px; align-self: flex-start; }
+.bubble.user { background: var(--primary); color: #fff; border-bottom-right-radius: 4px; align-self: flex-end; }
+
+/* Typing Indicator */
+.typing { display: flex; gap: 4px; padding: 16px; align-items: center; }
+.typing span { width: 8px; height: 8px; background: var(--muted-fg); border-radius: 50%; animation: typingBounce 1.4s infinite ease-in-out both; }
+.typing span:nth-child(1) { animation-delay: -0.32s; }
+.typing span:nth-child(2) { animation-delay: -0.16s; }
+@keyframes typingBounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+.chat-input { display: flex; gap: 12px; }
+.chat-input input { flex: 1; }
+.chat-input button { width: auto; padding: 12px 24px; }
+
+.settings-box {
+  margin-bottom: 24px; padding: 16px; border: 1px solid var(--accent); border-radius: 8px;
+  background: rgba(34, 197, 94, 0.05); display: flex; align-items: center; gap: 16px;
+}
+.settings-box label { margin: 0; color: var(--accent); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.settings-box input { background: var(--card); border-color: var(--accent); flex: 1; }
+.settings-box button { width: auto; background: var(--accent); padding: 12px 20px; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; }
+  .sidebar { flex-direction: row; align-items: center; padding: 16px; gap: 16px; }
+  .nav { flex-direction: row; overflow-x: auto; }
+  .nav button { white-space: nowrap; width: auto; padding: 8px 12px; }
+  .profile-card { margin: 0; padding: 0; border: none; margin-left: auto; }
+  .profile-info { display: none; }
+  .two-col, .field-row { grid-template-columns: 1fr; }
+}

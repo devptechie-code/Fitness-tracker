@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fitness Tracker PRO</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- AUTH OVERLAY -->
+  <div class="overlay active" id="authOverlay">
+    <div class="modal-card stagger-in" style="--i:1">
+      <div class="modal-header">
+        <h1>Fitness Tracker</h1>
+        <p>Your ultimate daily companion.</p>
+      </div>
+      
+      <form id="authForm">
+        <div class="field-group">
+          <label>Email</label>
+          <input type="email" id="authEmail" required placeholder="athlete@example.com">
+        </div>
+        <div class="field-group">
+          <label>Password</label>
+          <input type="password" id="authPassword" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn" id="authSubmitBtn">Sign In</button>
+        <span class="toggle-link" id="authToggle">Need an account? Sign up here.</span>
+      </form>
+    </div>
+  </div>
+
+  <!-- ONBOARDING OVERLAY -->
+  <div class="overlay" id="onboardOverlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h1>Profile Setup</h1>
+        <p>Let's personalize your fitness engine.</p>
+      </div>
+      
+      <form id="onboardForm">
+        <div class="field-row">
+          <div class="field-group"><label>Name</label><input type="text" id="obName" required></div>
+          <div class="field-group">
+            <label>Biological Sex</label>
+            <select id="obSex" required><option value="male">Male</option><option value="female">Female</option></select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Age</label><input type="number" id="obAge" required min="13" max="100"></div>
+          <div class="field-group">
+            <label>Activity Level</label>
+            <select id="obActivity" required>
+              <option value="sedentary">Sedentary (No exercise)</option>
+              <option value="lightly_active">Light (1-3 days/week)</option>
+              <option value="moderately_active">Moderate (3-5 days/week)</option>
+              <option value="very_active">Very Active (6-7 days/week)</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Height (cm)</label><input type="number" id="obHeight" required min="100" max="250"></div>
+          <div class="field-group"><label>Weight (kg)</label><input type="number" id="obWeight" required min="30" max="300" step="0.1"></div>
+        </div>
+        
+        <div class="field-row" style="margin-top:16px; border-top:1px solid var(--border); padding-top:16px;">
+          <div class="field-group"><label>Emergency Contact Name</label><input type="text" id="obEmName" placeholder="e.g. John Doe"></div>
+          <div class="field-group"><label>Emergency Contact Email</label><input type="email" id="obEmEmail" placeholder="partner@example.com"></div>
+        </div>
+
+        <div id="pregToggleArea" style="display:none;">
+          <div class="preg-toggle-box">
+            <label><input type="checkbox" id="obPregToggle"> I am currently pregnant</label>
+            <div id="pregFields" style="display:none; margin-top:12px;">
+              <div class="field-row" style="margin-bottom:0;">
+                <div class="field-group"><label>Week</label><input type="number" id="obWeek" placeholder="e.g. 22"></div>
+                <div class="field-group"><label>Pre-Weight (kg)</label><input type="number" id="obPreWeight" step="0.1"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn" style="margin-top:20px;">Launch Dashboard</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div class="shell" id="appShell" style="display:none;">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sb-brand">
+        <div class="sb-logo">FT</div>
+        <h1>Fitness Tracker</h1>
+      </div>
+      <nav class="nav" id="navMenu">
+        <button class="active" data-view="v-dashboard">Dashboard</button>
+        <button data-view="v-log">Daily Log</button>
+        <button data-view="v-coach">Health Coach</button>
+        <!-- Pregnancy tab injected here if applicable -->
+      </nav>
+      <div class="profile-card">
+        <div class="avatar" id="sbAvatar">U</div>
+        <div class="profile-info">
+          <strong id="sbName">User</strong>
+          <span onclick="logout()">Sign Out</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="content">
+      
+      <header class="topbar stagger-in" style="--i:1">
+        <div>
+          <h2 id="topTitle">Command Center</h2>
+          <p id="topSub">Your personalized tracking dashboard.</p>
+        </div>
+        <div class="pill pill-ok" id="statusPill">System Online</div>
+      </header>
+
+      <!-- VIEW: DASHBOARD -->
+      <section id="v-dashboard" class="view active">
+        <div class="grid-cards">
+          <div class="card kpi stagger-in" style="--i:2">
+            <div class="kpi-label">Current BMI</div>
+            <div class="kpi-val" id="valBmi">--</div>
+            <div class="kpi-sub" id="valStatus">--</div>
+          </div>
+          <div class="card kpi stagger-in" style="--i:3">
+            <div class="kpi-label">Daily Calories (TDEE)</div>
+            <div class="kpi-val" id="valTdee">--</div>
+            <div class="kpi-sub">Kcal Goal</div>
+          </div>
+          <div class="card kpi stagger-in" style="--i:4" id="kpiPreg" style="display:none;">
+            <div class="kpi-label">Pregnancy Week</div>
+            <div class="kpi-val" id="valWeek">--</div>
+            <div class="kpi-sub" id="valGain">--</div>
+          </div>
+        </div>
+
+        <div class="two-col stagger-in" style="--i:5">
+          <div class="card">
+            <h3>Today's Fitness Plan</h3>
+            <p style="color:var(--muted-fg); font-size:14px; margin-bottom:12px;">Build your custom workout by adding exercises, sets, and reps below.</p>
+            <div style="display:flex; gap:8px; margin-bottom:16px;">
+              <input type="text" id="gymEx" placeholder="Exercise" style="flex:2;">
+              <input type="number" id="gymSets" placeholder="Sets" style="flex:1;">
+              <input type="number" id="gymReps" placeholder="Reps" style="flex:1;">
+              <button class="btn" style="width:auto; padding:0 16px;" onclick="addGymItem()">+</button>
+            </div>
+            <div class="checklist" id="workoutList">
+              <!-- JS fills dynamically -->
+            </div>
+          </div>
+          <div class="card">
+            <h3>Progress & Achievements</h3>
+            <div id="achievementsWidget" style="display:flex; flex-direction:column; gap:16px; margin-top:16px;">
+              <div class="check-item" style="cursor:default; background:var(--bg);">
+                <div style="flex:1;">
+                  <div style="font-size:12px; color:var(--muted-fg); text-transform:uppercase;">Weight Trend</div>
+                  <div id="achWeight" style="font-size:18px; font-weight:600; color:var(--primary);">--</div>
+                </div>
+              </div>
+              <div class="check-item" style="cursor:default; background:var(--bg);">
+                <div style="flex:1;">
+                  <div style="font-size:12px; color:var(--muted-fg); text-transform:uppercase;">Calorie Control</div>
+                  <div id="achCals" style="font-size:18px; font-weight:600; color:var(--accent);">--</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: DAILY LOG -->
+      <section id="v-log" class="view">
+        <div class="card stagger-in" style="--i:2">
+          <h3 id="logTitle">Daily Fitness Log</h3>
+          <form id="logForm">
+            <div class="field-row">
+              <div class="field-group"><label>Weight (kg)</label><input type="number" id="logWeight" required step="0.1"></div>
+              <div class="field-group"><label>Water (Glasses)</label><input type="number" id="logWater" required></div>
+            </div>
+            <div class="field-row">
+              <div class="field-group"><label>Calories Consumed</label><input type="number" id="logCals" required></div>
+            </div>
+            
+            <div id="logPregFields" style="display:none; margin-top:20px; padding-top:20px; border-top:1px solid var(--border);">
+              <h4 style="margin-bottom:12px; color:var(--primary);">Maternal Tracking</h4>
+              <div class="field-row">
+                <div class="field-group"><label>Baby Kicks Counted</label><input type="number" id="logKicks"></div>
+                <div class="field-group">
+                  <label>Symptoms</label>
+                  <select id="logSymptoms">
+                    <option value="">None</option>
+                    <option value="Nausea">Nausea</option>
+                    <option value="Fatigue">Fatigue</option>
+                    <option value="Severe pain">Severe pain</option>
+                    <option value="Dizziness">Dizziness</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn" style="margin-top:16px;">Submit Log</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- VIEW: DOCTOR -->
+      <section id="v-coach" class="view">
+        <div class="stagger-in" style="--i:2">
+          
+          <!-- ADMIN ONLY: PDF UPLOAD FOR RAG (HIDDEN) -->
+          <div class="settings-box" style="display:none; border-color: var(--primary); background: rgba(249,115,22,0.05);">
+            <label style="color:var(--primary);">📄 Admin RAG Upload:</label>
+            <input type="file" id="pdfUpload" accept=".pdf" style="background:transparent; border:none;">
+            <button class="btn" onclick="uploadPdf()" style="background:var(--primary);">Ingest PDF</button>
+          </div>
+
+          <div class="card">
+            <h3>Emergency Doctor AI</h3>
+            <div class="chat-window" id="chatWindow">
+              <div class="bubble bot">I am a medical emergency doctor. I will try to help you.</div>
+            </div>
+            <div class="chat-input">
+              <input type="text" id="chatInput" placeholder="Type your symptoms or questions...">
+              <button class="btn" onclick="sendChat()">Send</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: MATERNAL EMERGENCY (Pregnant only) -->
+      <section id="v-maternal" class="view">
+        <div class="two-col stagger-in" style="--i:2">
+          <div class="card" style="border-color:var(--destructive);">
+            <h3 style="color:var(--destructive);">Emergency Contact Broadcast</h3>
+            <p style="color:var(--muted-fg); margin-bottom:16px;">
+              An email will be sent to your doctor to immediately contact you. Just click or press the button.
+            </p>
+            <button class="btn btn-danger" onclick="triggerEmergency()">SEND ALERT NOW</button>
+            <div id="emergencyStatus" style="margin-top:12px; font-weight:600; color:var(--accent);"></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+# Pregnancy Health Tracking RAG Document
+
+## Overview
+
+This knowledge base is designed for a mobile application that supports pregnant users with daily health tracking, symptom logging, education, and safety alerts.  
+The app should provide evidence-based guidance, simple self-check prompts, and urgent escalation for warning signs.  
+Because pregnancy apps frequently track symptoms and weekly progress, the content should be organized around daily use and trimester-aware support [web:9][web:25].
+
+## Product Goals
+
+- Help users record daily symptoms in under one minute.
+- Show trends over time across pregnancy.
+- Provide trusted pregnancy education in plain language.
+- Identify urgent warning signs that need immediate medical attention.
+- Support reminders for hydration, medication, rest, and appointments [web:9][web:14].
+
+## Target Users
+
+- Pregnant women in any trimester.
+- Users with low-risk or moderate-risk pregnancies who want routine tracking.
+- Users who need symptom guidance between prenatal visits.
+- Users who want quick access to warning-sign education and self-care tips.
+
+## Core Tracking Categories
+
+### 1. General wellbeing
+Track:
+- Energy level.
+- Fatigue.
+- Mood.
+- Stress.
+- Sleep quality.
+- Anxiety.
+- Appetite.
+
+### 2. Common pregnancy symptoms
+Track:
+- Nausea.
+- Vomiting.
+- Heartburn.
+- Constipation.
+- Diarrhea.
+- Headache.
+- Back pain.
+- Pelvic pain.
+- Shortness of breath.
+- Swelling.
+- Dizziness [web:25].
+
+### 3. Pregnancy-specific checks
+Track:
+- Vaginal bleeding.
+- Fluid leakage.
+- Contractions.
+- Abdominal pain.
+- Baby movement.
+- Reduced fetal movement.
+- Cramping [web:14][web:15].
+
+### 4. Lifestyle and routine
+Track:
+- Water intake.
+- Meals.
+- Exercise.
+- Supplements.
+- Medication.
+- Prenatal visits.
+- Lab tests.
+- Rest periods.
+
+## Daily Check-In Flow
+
+The app should use a short daily flow with:
+- Yes/no symptom questions.
+- Severity scale from 0 to 5.
+- Duration prompt.
+- “New, worse, or same” prompt.
+- Optional notes field.
+- Pregnancy week selector.
+
+Example:
+- “Do you have headache today?”
+- “How severe is it?”
+- “Is it new, worse, or the same as yesterday?”
+- “Do you also have vision changes or swelling?”
+
+Week-by-week tracking is useful because symptom patterns can change over the course of pregnancy [web:25].
+
+## Symptom Guidance
+
+### Nausea and vomiting
+Mild nausea is common in pregnancy.  
+Encourage small meals, fluids, and rest.  
+Escalate if vomiting is frequent, the user cannot keep fluids down, or signs of dehydration appear.
+
+### Fatigue and sleep difficulty
+Fatigue is common, especially earlier in pregnancy, while sleep difficulty may increase later in pregnancy [web:25].  
+Suggest rest, regular sleep routines, and hydration.  
+Escalate if fatigue is severe or paired with dizziness, fainting, or illness.
+
+### Headache
+Headache can be common, but severe or persistent headache is a warning sign.  
+Ask whether the user has vision changes, swelling, or dizziness.  
+If the headache is severe, worsening, or not improving, advise urgent medical evaluation [web:14].
+
+### Swelling
+Mild swelling can occur, but swelling of the hands, face, or extreme swelling is concerning.  
+Ask about sudden onset, pain, redness, or shortness of breath.  
+Escalate if swelling is severe or unusual [web:14].
+
+### Abdominal pain and cramping
+Mild cramping can happen, but severe or constant abdominal pain is urgent.  
+Ask whether there is bleeding, fluid leakage, contractions, or reduced fetal movement.  
+Escalate if pain is strong, persistent, or worsening [web:14][web:15].
+
+### Vaginal bleeding or fluid leakage
+Any bleeding or fluid leakage should be treated seriously.  
+The app should prompt immediate contact with a clinician or emergency service, depending on severity and local guidance [web:14][web:15].
+
+## Urgent Warning Signs
+
+The app must show an immediate alert if the user reports any of the following:
+- Vaginal bleeding.
+- Fluid leakage.
+- Baby moving less than usual.
+- Severe headache that does not go away.
+- Vision changes.
+- Dizziness or fainting.
+- Fever of 100.4 F / 38 C or higher.
+- Extreme swelling of the hands or face.
+- Severe abdominal pain.
+- Trouble breathing.
+- Chest pain.
+- Seizure or convulsions.
+- Severe weakness or inability to get out of bed [web:14][web:15].
+
+## Triage Logic
+
+### Green
+Use when symptoms are mild, expected, and not accompanied by warning signs.  
+Provide self-care tips and monitoring advice.
+
+### Yellow
+Use when symptoms are persistent, uncomfortable, or unclear.  
+Encourage the user to track again later and contact a clinician if symptoms continue.
+
+### Red
+Use when warning signs appear.  
+Show urgent guidance and tell the user to seek immediate medical care [web:14].
+
+## RAG Retrieval Topics
+
+Split the knowledge base into the following retrieval documents:
+
+1. Pregnancy overview and trimester basics.
+2. Daily symptom tracker guide.
+3. Common symptoms and self-care.
+4. Emergency warning signs.
+5. Nutrition and hydration.
+6. Sleep and mental wellbeing.
+7. Medication and supplement safety.
+8. Prenatal appointment reminders.
+9. Postpartum warning signs.
+10. Privacy and data protection.
+
+## Response Style for the Assistant
+
+The assistant should:
+- Use simple, calm language.
+- Avoid diagnosing.
+- Ask clarifying questions when symptoms are vague.
+- Prioritize safety over completeness.
+- Encourage professional care for red-flag symptoms.
+- Avoid false reassurance.
+
+Example assistant behavior:
+- “How severe is the headache?”
+- “Do you also have swelling or vision changes?”
+- “Because this includes a warning sign, please seek urgent medical care now.”
+
+## Safety Disclaimer
+
+This app is for education and symptom tracking only.  
+It does not diagnose, treat, or replace medical care.  
+If symptoms are severe, new, worsening, or worrying, the user should contact a healthcare professional or emergency service immediately.
+
+## Privacy and Consent
+
+The app should collect only the minimum data needed for health tracking.  
+Users should clearly see what data is stored, why it is collected, and whether it is shared.  
+Consent should be explicit before data collection begins, because women’s mHealth apps have often shown weak privacy, sharing, and security practices [web:19].  
+Security settings, data access controls, and transparent privacy policies should be easy to find and understand [web:19].
+
+## Recommended Metadata Tags
+
+- pregnancy
+- antenatal
+- maternal-health
+- symptom-tracking
+- warning-signs
+- trimester
+- prenatal-care
+- hydration
+- sleep
+- mood
+- privacy
+- consent
+- escalation
+
+## Example Retrieval Snippets
+
+### Snippet 1
+“Severe headache, vision changes, dizziness, or swelling of the hands or face are urgent warning signs in pregnancy.” [web:14]
+
+### Snippet 2
+“Pregnancy apps commonly include symptom tracking and baby development features, but evidence-based guidance and trustworthiness vary.” [web:9]
+
+### Snippet 3
+“Women’s mHealth apps often have poor privacy, data sharing, and security standards, so explicit consent and minimal data collection are important.” [web:19]
+
+## Suggested Assistant Prompt
+
+You are a maternal health support assistant for pregnant users.  
+Your job is to help users log daily symptoms, explain common pregnancy discomforts, and identify urgent warning signs.  
+Do not diagnose or replace medical care.  
+If the user reports bleeding, fluid leakage, reduced fetal movement, severe headache, vision changes, chest pain, trouble breathing, seizure, fever, or extreme swelling, advise urgent medical attention immediately.  
+Use calm, clear language and ask follow-up questions when needed.
