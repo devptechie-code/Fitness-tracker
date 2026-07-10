@@ -2,101 +2,110 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>VitaCircle | Fitness Tracker</title>
+  <title>VitaCircle | Family Health, Every Age</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Quicksand:wght@500;600;700&family=Rajdhani:wght@500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Quicksand:wght@500;600;700&family=Rajdhani:wght@500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
-  <!-- AUTH OVERLAY -->
+  <!-- AUTH OVERLAY (first screen) -->
   <div class="overlay active" id="authOverlay">
     <div class="modal-card">
       <div class="modal-header">
-        <h1>Welcome to VitaCircle</h1>
+        <h1><span class="dot"></span> Welcome to VitaCircle</h1>
         <p>Family Health, Every Age.</p>
       </div>
-      
       <form id="authForm">
         <div class="field-group">
-          <label>Email</label>
-          <input type="email" id="authEmail" required placeholder="name@example.com">
+          <label for="authEmail">Email</label>
+          <input type="email" id="authEmail" autocomplete="email" required placeholder="name@example.com">
         </div>
         <div class="field-group">
-          <label>Password</label>
-          <input type="password" id="authPassword" required placeholder="••••••••">
+          <label for="authPassword">Password</label>
+          <input type="password" id="authPassword" autocomplete="current-password" required minlength="6" placeholder="••••••••">
         </div>
-        <button type="submit" class="btn" id="authSubmitBtn">Sign In</button>
-        <span class="toggle-link" id="authToggle">Need an account? Sign up here.</span>
+        <p class="form-error" id="authError" role="alert"></p>
+        <button type="submit" class="btn btn-primary" id="authSubmitBtn">Sign In</button>
+        <button type="button" class="toggle-link" id="authToggle">Need an account? Sign up here.</button>
       </form>
     </div>
   </div>
 
   <!-- ONBOARDING OVERLAY -->
   <div class="overlay" id="onboardOverlay">
-    <div class="modal-card">
+    <div class="modal-card modal-wide">
       <div class="modal-header">
         <h1>Profile Setup</h1>
-        <p>Let's personalize your health engine.</p>
+        <p>Your whole experience adapts to who you are.</p>
       </div>
-      
       <form id="onboardForm">
         <div class="field-row">
-          <div class="field-group"><label>Name</label><input type="text" id="obName" required></div>
+          <div class="field-group"><label for="obName">Full name</label><input type="text" id="obName" required></div>
           <div class="field-group">
-            <label>Biological Sex</label>
-            <select id="obSex" required><option value="male">Male</option><option value="female">Female</option></select>
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field-group"><label>Age</label><input type="number" id="obAge" required min="8" max="120"></div>
-          <div class="field-group">
-            <label>Activity Level</label>
-            <select id="obActivity" required>
-              <option value="sedentary">Sedentary (None)</option>
-              <option value="lightly_active">Light (1-3 days)</option>
-              <option value="moderately_active">Moderate (3-5 days)</option>
-              <option value="very_active">Very Active (6-7 days)</option>
+            <label for="obSex">Biological sex</label>
+            <select id="obSex" required>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
             </select>
           </div>
         </div>
         <div class="field-row">
-          <div class="field-group"><label>Height (cm)</label><input type="number" id="obHeight" required min="100" max="250"></div>
-          <div class="field-group"><label>Weight (kg)</label><input type="number" id="obWeight" required min="20" max="300" step="0.1"></div>
-        </div>
-        
-        <div class="field-row" style="margin-top:12px; border-top:1px solid rgba(0,0,0,0.06); padding-top:12px;">
-          <div class="field-group"><label>Emergency Contact</label><input type="text" id="obEmName" placeholder="Name (Optional)"></div>
-          <div class="field-group"><label>Emergency Email</label><input type="email" id="obEmEmail" placeholder="Email (Optional)"></div>
+          <div class="field-group"><label for="obBirthdate">Date of birth</label><input type="date" id="obBirthdate" required></div>
+          <div class="field-group">
+            <label for="obActivity">Activity level</label>
+            <select id="obActivity" required>
+              <option value="sedentary">Sedentary (none)</option>
+              <option value="lightly_active">Light (1–3 days)</option>
+              <option value="moderately_active">Moderate (3–5 days)</option>
+              <option value="very_active">Very active (6–7 days)</option>
+            </select>
+          </div>
         </div>
         <div class="field-row">
-          <div class="field-group"><label>Guardian Contact</label><input type="text" id="obGuarName" placeholder="Name (Optional)"></div>
-          <div class="field-group"><label>Guardian Email</label><input type="email" id="obGuarEmail" placeholder="Email (Optional)"></div>
-        </div>
-        <div class="field-row">
-          <div class="field-group"><label>Doctor / Care Provider</label><input type="text" id="obDocName" placeholder="Name (Optional)"></div>
-          <div class="field-group"><label>Doctor Email</label><input type="email" id="obDocEmail" placeholder="Email (Optional)"></div>
+          <div class="field-group"><label for="obHeight">Height (cm)</label><input type="number" id="obHeight" required min="80" max="250"></div>
+          <div class="field-group"><label for="obWeight">Weight (kg)</label><input type="number" id="obWeight" required min="15" max="300" step="0.1"></div>
         </div>
 
-        <div id="pregToggleArea" style="display:none;">
-          <div class="preg-toggle-box">
-            <label style="font-weight:700; cursor:pointer;"><input type="checkbox" id="obPregToggle"> I am currently pregnant</label>
-            <div id="pregFields" style="display:none; margin-top:12px;">
-              <div class="field-row" style="margin-bottom:0;">
-                <div class="field-group"><label>Pregnancy Week</label><input type="number" id="obWeek" placeholder="e.g. 22"></div>
-                <div class="field-group"><label>Pre-Weight (kg)</label><input type="number" id="obPreWeight" step="0.1"></div>
-              </div>
+        <div id="pregToggleArea" class="preg-toggle-box" hidden>
+          <label class="checkbox-label"><input type="checkbox" id="obPregToggle"> I am currently pregnant</label>
+          <div id="pregFields" hidden>
+            <div class="field-row">
+              <div class="field-group"><label for="obWeek">Pregnancy week</label><input type="number" id="obWeek" min="1" max="40" placeholder="e.g. 22"></div>
+              <div class="field-group"><label for="obPreWeight">Pre-pregnancy weight (kg)</label><input type="number" id="obPreWeight" step="0.1"></div>
             </div>
           </div>
         </div>
 
-        <button type="submit" class="btn" style="margin-top:16px;">Launch VitaCircle</button>
+        <div class="section-divider">Care contacts <span>(optional)</span></div>
+        <div class="field-row">
+          <div class="field-group"><label for="obEmName">Emergency contact</label><input type="text" id="obEmName" placeholder="Name"></div>
+          <div class="field-group"><label for="obEmEmail">Emergency email</label><input type="email" id="obEmEmail" placeholder="Email"></div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label for="obGuarName">Guardian</label><input type="text" id="obGuarName" placeholder="Name"></div>
+          <div class="field-group"><label for="obGuarEmail">Guardian email</label><input type="email" id="obGuarEmail" placeholder="Email"></div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label for="obDocName">Doctor / care provider</label><input type="text" id="obDocName" placeholder="Name"></div>
+          <div class="field-group"><label for="obDocEmail">Doctor email</label><input type="email" id="obDocEmail" placeholder="Email"></div>
+        </div>
+
+        <div class="section-divider">Family <span>(optional)</span></div>
+        <div class="field-group">
+          <label for="obFamilyCode">Family code — leave blank to start your own household (you become its head)</label>
+          <input type="text" id="obFamilyCode" placeholder="e.g. a1b2c3d4">
+        </div>
+
+        <p class="form-error" id="onboardError" role="alert"></p>
+        <button type="submit" class="btn btn-primary">Launch VitaCircle</button>
       </form>
     </div>
   </div>
 
-  <!-- LOG ENTRY OVERLAY -->
+  <!-- LOG VITALS OVERLAY -->
   <div class="overlay" id="logOverlay">
     <div class="modal-card">
       <div class="modal-header">
@@ -105,64 +114,51 @@
       </div>
       <form id="logForm">
         <div class="field-row">
-          <div class="field-group"><label>Weight (kg)</label><input type="number" id="logWeight" required step="0.1"></div>
-          <div class="field-group"><label>Water (Glasses)</label><input type="number" id="logWater" required></div>
+          <div class="field-group"><label for="logWeight">Weight (kg)</label><input type="number" id="logWeight" required step="0.1"></div>
+          <div class="field-group"><label for="logWater">Water (glasses)</label><input type="number" id="logWater" required min="0"></div>
         </div>
-        <div class="field-row">
-          <div class="field-group"><label>Calories Consumed</label><input type="number" id="logCals" required></div>
-        </div>
-        
-        <div id="logPregFields" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid rgba(0,0,0,0.06);">
-          <div class="field-row" style="margin-bottom:0;">
-            <div class="field-group"><label>Baby Kicks</label><input type="number" id="logKicks"></div>
+        <div class="field-group"><label for="logCals">Calories consumed</label><input type="number" id="logCals" required min="0"></div>
+        <div id="logPregFields" hidden>
+          <div class="field-row">
+            <div class="field-group"><label for="logKicks">Baby kicks</label><input type="number" id="logKicks" min="0"></div>
             <div class="field-group">
-              <label>Symptoms</label>
+              <label for="logSymptoms">Symptoms</label>
               <select id="logSymptoms">
                 <option value="">None</option>
-                <option value="Nausea">Nausea</option>
-                <option value="Fatigue">Fatigue</option>
-                <option value="Severe pain">Severe pain</option>
-                <option value="Dizziness">Dizziness</option>
+                <option>Nausea</option><option>Fatigue</option>
+                <option>Severe pain</option><option>Dizziness</option>
               </select>
             </div>
           </div>
         </div>
-
-        <div style="display:flex; gap:12px; margin-top:16px;">
-          <button type="button" class="btn" style="background:var(--secondary);" onclick="document.getElementById('logOverlay').classList.remove('active')">Cancel</button>
-          <button type="submit" class="btn">Submit Log</button>
+        <div class="btn-row">
+          <button type="button" class="btn btn-secondary" data-close="logOverlay">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit Log</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- APP SHELL -->
-  <div id="appShell" style="display:none;">
-    <div class="topbar">
+  <div id="appShell" hidden>
+    <header class="topbar">
       <div class="brand"><span class="dot"></span>VitaCircle</div>
       <div class="top-actions">
-        <button class="logout-btn" onclick="toggleFamilyView()" id="familyToggleBtn">Switch to Family View</button>
-        <button class="logout-btn" onclick="logout()">Sign Out</button>
+        <button class="chip-btn" id="familyToggleBtn" hidden>Family Overview</button>
+        <button class="chip-btn" id="logoutBtn">Sign out</button>
       </div>
-    </div>
-    
+    </header>
     <main id="mainContent"></main>
-    
-    <!-- FLOATING CHAT BUBBLE (AI Doctor) -->
-    <div class="chat-bubble" id="chatBubble" style="display:none;">
-      <div class="who">🤖 <span id="chatBotName">Vita — Medical Assistant</span></div>
-      <div class="chat-history" id="chatWindow">
-        <div class="bubble bot" id="chatWelcomeMsg">Hello! I am your AI doctor. How are you feeling today?</div>
-      </div>
-      <div class="chat-input">
-        <input type="text" id="chatInput" placeholder="Type a symptom or question...">
-        <button onclick="sendChat()">↑</button>
-      </div>
-    </div>
-
-    <footer>Powered by VitaCircle Intelligence. Privacy first.</footer>
+    <div id="chatRoot"></div>
+    <footer>Powered by VitaCircle Intelligence · Privacy first — your records are only shared when <em>you</em> grant access.</footer>
   </div>
 
-  <script src="script.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/themes.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/pregnancy.js"></script>
+  <script src="js/family.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
