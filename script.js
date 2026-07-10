@@ -1,7 +1,7 @@
 // State
 let userProfile = null;
 let userId = null;
-const API_BASE = "https://b84a19acdd8cf0.lhr.life/api";
+const API_BASE = "https://796e167dcc1aab.lhr.life/api";
 
 // Elements
 const authOverlay = document.getElementById('authOverlay');
