@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List, Optional
 from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean
@@ -302,6 +303,8 @@ def chat(payload: ChatPayload, db: Session = Depends(get_db)):
         return {"reply": "API Error: No working model found."}
     except Exception as e:
         return {"reply": f"API Error: Make sure your hardcoded key is valid! ({str(e)})"}
+
+app.mount("/", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static"), html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
