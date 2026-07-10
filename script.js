@@ -210,11 +210,11 @@ async function renderMain() {
     <div class="grid">
       <div class="card">
         <h3>🎯 Today's Goals</h3>
-        ${plan.map((g,i)=>\`
-          <div class="goal-row" style="cursor:pointer" onclick="toggleGymItem(\${i})">
-            <div class="check \${g.done ? 'done':''}">\${g.done ? '✓':''}</div>\${g.name}
+        ${plan.map((g,i)=>`
+          <div class="goal-row" style="cursor:pointer" onclick="toggleGymItem(${i})">
+            <div class="check ${g.done ? 'done':''}">${g.done ? '✓':''}</div>${g.name}
           </div>
-        \`).join('')}
+        `).join('')}
         <div style="display:flex; gap:8px; margin-top:12px;">
           <input type="text" id="newGoalInput" placeholder="Add a goal..." style="flex:1; padding:8px 12px; border-radius:12px; border:1px solid rgba(0,0,0,0.1); font-family:var(--font-body);">
           <button class="action-btn" onclick="addGymItem()">+</button>
@@ -224,12 +224,12 @@ async function renderMain() {
       <div class="card">
         <h3>📊 Current Vitals</h3>
         <div class="stat-ring">
-          <div class="ring" style="background:\${ringColor(bmiPct)}">\${bmiPct}%</div>
-          <div><div class="stat-val">\${bmi}</div><div class="stat-label">Body Mass Index (BMI)</div></div>
+          <div class="ring" style="background:${ringColor(bmiPct)}">${bmiPct}%</div>
+          <div><div class="stat-val">${bmi}</div><div class="stat-label">Body Mass Index (BMI)</div></div>
         </div>
         <div class="stat-ring">
           <div class="ring" style="background:var(--secondary)">100%</div>
-          <div><div class="stat-val">\${tdee} kcal</div><div class="stat-label">Daily Target (TDEE)</div></div>
+          <div><div class="stat-val">${tdee} kcal</div><div class="stat-label">Daily Target (TDEE)</div></div>
         </div>
         <button class="action-btn" style="width:100%; text-align:center; margin-top:12px;" onclick="openLogModal()">📝 Log Today's Stats</button>
       </div>
@@ -241,8 +241,8 @@ async function renderMain() {
       <div class="card">
         <h3>🤰 Maternal Overview</h3>
         <div class="stat-ring">
-          <div class="ring" style="background:var(--primary)">Wk\n\${userProfile.pregWeek || "?"}</div>
-          <div><div class="stat-val">+\${gain} kg</div><div class="stat-label">Total Weight Gain</div></div>
+          <div class="ring" style="background:var(--primary)">Wk\n${userProfile.pregWeek || "?"}</div>
+          <div><div class="stat-val">+${gain} kg</div><div class="stat-label">Total Weight Gain</div></div>
         </div>
         <button class="action-btn danger" style="width:100%; text-align:center;" onclick="triggerEmergency()">🚨 SEND EMERGENCY ALERT</button>
         <div id="emStatusText" style="font-size:12px; margin-top:8px; color:var(--primary); font-weight:700;"></div>
@@ -252,7 +252,7 @@ async function renderMain() {
      html += `
       <div class="card">
         <h3>🚨 Emergency System</h3>
-        <p style="font-size:13px; color:var(--text-soft); margin-bottom:12px;">Notifies \${userProfile.emergencyName || 'your emergency contact'} immediately.</p>
+        <p style="font-size:13px; color:var(--text-soft); margin-bottom:12px;">Notifies ${userProfile.emergencyName || 'your emergency contact'} immediately.</p>
         <button class="action-btn danger" style="width:100%; text-align:center;" onclick="triggerEmergency()">SEND ALERT NOW</button>
         <div id="emStatusText" style="font-size:12px; margin-top:8px; color:var(--primary); font-weight:700;"></div>
       </div>
@@ -324,18 +324,18 @@ window.sendChat = async function() {
   if(!msg) return;
   
   const cw = document.getElementById('chatWindow');
-  cw.innerHTML += `<div class="bubble user">\${msg}</div>`;
+  cw.innerHTML += `<div class="bubble user">${msg}</div>`;
   input.value = '';
   
   const typingId = 'typing-' + Date.now();
-  cw.innerHTML += `<div class="bubble bot typing" id="\${typingId}">Typing...</div>`;
+  cw.innerHTML += `<div class="bubble bot typing" id="${typingId}">Typing...</div>`;
   cw.scrollTop = cw.scrollHeight;
 
   try {
     const res = await fetch(API_BASE + "/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({user_id: userId, message: msg}) });
     const data = await res.json();
     document.getElementById(typingId).remove();
-    cw.innerHTML += `<div class="bubble bot">\${data.reply}</div>`;
+    cw.innerHTML += `<div class="bubble bot">${data.reply}</div>`;
     cw.scrollTop = cw.scrollHeight;
   } catch (err) {
     document.getElementById(typingId).remove();
@@ -372,17 +372,17 @@ function renderFamily() {
     <div class="grid" style="grid-template-columns:1fr;">
       <div class="card">
         <h3>👨👩👧👦 Household — Today</h3>
-        \${MEMBERS.map(m=>\`
+        ${MEMBERS.map(m=>`
           <div class="member-card">
-            <div class="member-chip" style="background:\${m.color}22; color:\${m.color}">\${m.icon}</div>
+            <div class="member-chip" style="background:${m.color}22; color:${m.color}">${m.icon}</div>
             <div class="member-info">
-              <div class="member-name">\${m.name}</div>
-              <div class="member-sub">\${m.note}</div>
+              <div class="member-name">${m.name}</div>
+              <div class="member-sub">${m.note}</div>
             </div>
-            <div class="member-progress"><div class="fill" style="width:\${m.pct}%; background:\${m.color}"></div></div>
-            <span class="alert-pill \${m.status==='due'?'alert-due':'alert-ok'}">\${m.status==='due'?'Action due':'On track'}</span>
+            <div class="member-progress"><div class="fill" style="width:${m.pct}%; background:${m.color}"></div></div>
+            <span class="alert-pill ${m.status==='due'?'alert-due':'alert-ok'}">${m.status==='due'?'Action due':'On track'}</span>
           </div>
-        \`).join('')}
+        `).join('')}
       </div>
     </div>
   `;
