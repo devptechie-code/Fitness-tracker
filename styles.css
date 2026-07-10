@@ -79,9 +79,9 @@ main{max-width:1180px; margin:0 auto; padding:24px;}
 .hero::before {
   content: "";
   position: absolute; top:0; left:0; right:0; bottom:0;
-  background: var(--hero-overlay, rgba(255,255,255,0.7));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--hero-overlay, rgba(0,0,0,0.4));
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   z-index: 0;
 }
 .hero > * { position: relative; z-index: 1; }
