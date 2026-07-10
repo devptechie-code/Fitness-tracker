@@ -268,13 +268,20 @@ def chat(payload: ChatPayload, db: Session = Depends(get_db)):
         import urllib.request
         import json
         
+        if user.is_pregnant:
+            persona_instruction = "You are an Emergency Doctor AI specializing in maternal and pregnancy care."
+        elif user.age and user.age < 13:
+            persona_instruction = "You are VitaBuddy, a friendly, fun AI health companion for kids. Use simple language and emojis."
+        else:
+            persona_instruction = "You are Vita, a professional medical and fitness assistant."
+
         context = (
-            f"You are an Emergency Doctor AI for pregnant women. The user is a {user.age} year old {user.sex}. "
+            f"{persona_instruction} The user is a {user.age} year old {user.sex}.\n"
             "CRITICAL INSTRUCTION: You are an API. Keep your response VERY concise (maximum 3 sentences). "
             'You MUST respond ONLY with a valid JSON object. Do NOT output any markdown, thinking, or scratchpads outside the JSON. '
             'Format: {"response": "Your final message here"}\n\n'
             f"MEDICAL KNOWLEDGE BASE CONTEXT:\n{context_text}\n\n"
-            "Answer the user's question using ONLY the knowledge base context above. If the context doesn't have the answer, advise them to seek emergency care."
+            "Answer the user's question based on the knowledge base if applicable. Be helpful and adaptive to their specific demographic."
         )
         
         prompt = f"{context}\n\nUser says: {payload.message}"
