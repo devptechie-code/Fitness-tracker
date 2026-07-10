@@ -264,7 +264,8 @@ def chat(payload: ChatPayload, db: Session = Depends(get_db)):
             pass
 
     try:
-        genai.configure(api_key=HACKATHON_GEMINI_API_KEY)
+        import urllib.request
+        import json
         
         context = (
             f"You are an Emergency Doctor AI for pregnant women. The user is a {user.age} year old {user.sex}. "
@@ -277,33 +278,27 @@ def chat(payload: ChatPayload, db: Session = Depends(get_db)):
         
         prompt = f"{context}\n\nUser says: {payload.message}"
         
-        available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-        available_models.sort(reverse=True)
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={HACKATHON_GEMINI_API_KEY}"
+        data = {"contents": [{"parts": [{"text": prompt}]}]}
+        req = urllib.request.Request(url, data=json.dumps(data).encode('utf-8'), headers={'Content-Type': 'application/json'})
         
-        for model_name in available_models:
+        with urllib.request.urlopen(req) as response:
+            resp_json = json.loads(response.read().decode())
+            reply_text = resp_json["candidates"][0]["content"]["parts"][0]["text"]
+            
+        # Bulletproof JSON extraction: find all { ... } blocks and parse the last valid one
+        json_blocks = re.findall(r'\{.*?\}', reply_text, re.DOTALL)
+        for block in reversed(json_blocks):
             try:
-                model = genai.GenerativeModel(model_name)
-                response = model.generate_content(prompt)
-                
-                reply_text = response.text
-                
-                # Bulletproof JSON extraction: find all { ... } blocks and parse the last valid one
-                json_blocks = re.findall(r'\{.*?\}', reply_text, re.DOTALL)
-                for block in reversed(json_blocks):
-                    try:
-                        data = json.loads(block)
-                        if "response" in data:
-                            return {"reply": data["response"]}
-                    except Exception:
-                        continue
-                        
-                # Absolute fallback if it somehow didn't use JSON at all
-                blocks = [b.strip() for b in reply_text.split('\n\n') if b.strip()]
-                if blocks: return {"reply": blocks[-1]}
-                
+                data = json.loads(block)
+                if "response" in data:
+                    return {"reply": data["response"]}
             except Exception:
                 continue
                 
+        # Absolute fallback if it somehow didn't use JSON at all
+        blocks = [b.strip() for b in reply_text.split('\n\n') if b.strip()]
+        if blocks: return {"reply": blocks[-1]}
         return {"reply": "API Error: No working model found."}
     except Exception as e:
         return {"reply": f"API Error: Make sure your hardcoded key is valid! ({str(e)})"}
