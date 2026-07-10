@@ -201,6 +201,7 @@ def get_history(user_id: int, db: Session = Depends(get_db)):
             "date": l.date,
             "weight_kg": l.weight_kg,
             "water_glasses": l.water_glasses,
+            "calories": l.calories,
             "workouts_done": json.loads(l.workouts_done),
             "symptoms": l.symptoms
         } for l in logs
