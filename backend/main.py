@@ -306,3 +306,9 @@ def chat(payload: ChatPayload, db: Session = Depends(get_db)):
         return {"reply": "API Error: No working model found."}
     except Exception as e:
         return {"reply": f"API Error: Make sure your hardcoded key is valid! ({str(e)})"}
+
+if __name__ == "__main__":
+    import uvicorn
+    import os
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
