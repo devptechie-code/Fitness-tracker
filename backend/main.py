@@ -15,7 +15,7 @@ import re
 # HARDCODED API KEY (For Hackathon Demo)
 # Replace this string with your real key!
 # ==========================================
-HACKATHON_GEMINI_API_KEY = "AQ.Ab8RN6ILes7nXgATrxxVwIZlILBXaW8gYcNRZ3ZU2vxoZsdxCQ"
+HACKATHON_GEMINI_API_KEY = "AQ.Ab8RN6KvZ12TbXICqnSByzW4LOHs8wA3Li89ELNRtPVER0TyOQ"
 
 import os
 
