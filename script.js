@@ -334,7 +334,7 @@ function triggerEmergency() {
     alert: "SEVERE SYMPTOMS DETECTED. IMMEDIATE ASSISTANCE REQUIRED."
   };
 
-  fetch('https://hook.eu1.make.com/75zkf3eqp3d5rpogslrwba7e6oox029y', {
+  fetch('https://hook.eu1.make.com/sz4lmgz0ts23725au6g1bwv1inydbp55', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
