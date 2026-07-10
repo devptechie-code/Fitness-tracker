@@ -62,6 +62,10 @@ class UserDB(Base):
     pre_weight = Column(Float, nullable=True)
     emergency_name = Column(String, nullable=True)
     emergency_email = Column(String, nullable=True)
+    guardian_name = Column(String, nullable=True)
+    guardian_email = Column(String, nullable=True)
+    doctor_name = Column(String, nullable=True)
+    doctor_email = Column(String, nullable=True)
 
 class DailyLogDB(Base):
     __tablename__ = "daily_logs"
@@ -111,6 +115,10 @@ class ProfilePayload(BaseModel):
     preWeight: Optional[float] = None
     emergencyName: Optional[str] = None
     emergencyEmail: Optional[str] = None
+    guardianName: Optional[str] = None
+    guardianEmail: Optional[str] = None
+    doctorName: Optional[str] = None
+    doctorEmail: Optional[str] = None
 
 class LogPayload(BaseModel):
     user_id: int
@@ -154,7 +162,11 @@ def login(payload: AuthPayload, db: Session = Depends(get_db)):
             "pregWeek": user.preg_week,
             "preWeight": user.pre_weight,
             "emergencyName": user.emergency_name,
-            "emergencyEmail": user.emergency_email
+            "emergencyEmail": user.emergency_email,
+            "guardianName": user.guardian_name,
+            "guardianEmail": user.guardian_email,
+            "doctorName": user.doctor_name,
+            "doctorEmail": user.doctor_email
         } if user.name else None
     }
 
@@ -175,6 +187,10 @@ def save_profile(payload: ProfilePayload, db: Session = Depends(get_db)):
     user.pre_weight = payload.preWeight
     user.emergency_name = payload.emergencyName
     user.emergency_email = payload.emergencyEmail
+    user.guardian_name = payload.guardianName
+    user.guardian_email = payload.guardianEmail
+    user.doctor_name = payload.doctorName
+    user.doctor_email = payload.doctorEmail
     db.commit()
     return {"status": "ok"}
 

@@ -81,7 +81,11 @@ onboardForm.onsubmit = async (e) => {
     pregWeek: pregToggle.checked ? parseInt(document.getElementById('obWeek').value) : null,
     preWeight: pregToggle.checked ? parseFloat(document.getElementById('obPreWeight').value) : null,
     emergencyName: document.getElementById('obEmName').value,
-    emergencyEmail: document.getElementById('obEmEmail').value
+    emergencyEmail: document.getElementById('obEmEmail').value,
+    guardianName: document.getElementById('obGuarName').value,
+    guardianEmail: document.getElementById('obGuarEmail').value,
+    doctorName: document.getElementById('obDocName').value,
+    doctorEmail: document.getElementById('obDocEmail').value
   };
 
   try {
@@ -303,6 +307,10 @@ window.triggerEmergency = function() {
     user_name: userProfile.name,
     contact_name: userProfile.emergencyName,
     contact_email: userProfile.emergencyEmail,
+    guardian_name: userProfile.guardianName,
+    guardian_email: userProfile.guardianEmail,
+    doctor_name: userProfile.doctorName,
+    doctor_email: userProfile.doctorEmail,
     alert: "SEVERE SYMPTOMS DETECTED. IMMEDIATE ASSISTANCE REQUIRED."
   };
 
