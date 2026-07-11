@@ -8,6 +8,7 @@ and calculates personal health targets from a sign-up questionnaire.
 ✅ **Sign in** — email ID + password login
 ✅ **Sign up questionnaire** — 4-step wizard: name, email, password → age, sex, height, weight (+ pregnancy) → activity level & other info → emergency contact (name, relationship, phone)
 ✅ **Health snapshot** — BMI + category, healthy weight range, BMR, TDEE
+✅ **Measurement log** — record today's weight **and height** (heights change — kids grow) right on the snapshot card; the panel on its right shows your improvement since the previous log (Δ weight / height / BMI with direction arrows)
 ✅ **Weekly workout targets** — cardio/strength (and balance / pregnancy safety) targets by demographic
 ✅ **Persona-adaptive UI** — Kid 🦖 / Teen 🎮 / Adult 💼 / Senior 🌿 / Mom-to-be 🤰, auto-assigned from age, sex & pregnancy
 ✅ **Default goals** — 5 glasses of water + 8,000 steps every person starts with
@@ -24,7 +25,8 @@ and calculates personal health targets from a sign-up questionnaire.
 ✅ **Detailed family views** — every member card in the Family Hub shows BMI (value + category, or "still growing" for under-18s) and daily calorie target up front, and expands to vitals rings (water/steps/calories %), healthy weight range, and workout plan
 ✅ **Category colour themes** — each member's portfolio card is themed by category (Kid sky-blue · Teen green · Adult slate · Senior amber · Mom-to-be rose) across its accent strip, avatar, tiles, bars, and rings, with a colour key in the family header
 ✅ **Head view** — the family creator gets a 🏠 Head view badge and a "What's due today" card summarising every member's open goals
-✅ **Vita assistant** — a friendly bubble with persona-voiced, context-aware nudges on every page
+✅ **Neo assistant** — a friendly bubble with persona-voiced, context-aware nudges on every page
+✅ **Neo AI chat (RAG)** — a floating chatbot that retrieves answers from two bundled knowledge bases (General health + Pregnancy) with an emergency red-flag guardrail. **No API key ships with the app**: it answers from the knowledge base for free, and a 🔑 "Use your own API key" option lets each user paste their own Gemini key (stored only in their browser) for full AI answers on their own quota
 ✅ **Accessibility** — WCAG contrast, visible focus states, keyboard nav, reduced motion
 
 ## 🧮 Backend logic & formulas
@@ -55,11 +57,13 @@ Multipliers: Sedentary 1.2 · Lightly Active 1.375 · Moderately Active 1.55 · 
 ## 📂 Project Structure
 
 ```
-vitacircle-code/
+neofit-code/
 ├── public/
 │   ├── index.html      # Sign-in, sign-up wizard & dashboard
 │   ├── styles.css      # Persona-adaptive theme system
-│   └── app.js          # Auth, health engine, trackers
+│   ├── app.js          # Auth, health engine, trackers, measurement log
+│   ├── kb.js           # RAG knowledge bases (General + Pregnancy)
+│   └── chat.js         # Neo AI chat: guardrail → retrieval → Gemini (BYOK)
 ├── server.js           # Express dev server
 ├── build.js            # Bundle to single HTML file
 ├── package.json        # Dependencies & scripts
@@ -90,9 +94,17 @@ npm run build    # creates dist/NeoFit.html — one self-contained file
 
 - Accounts live in the browser's `localStorage` (`neofit_users`); passwords are stored as SHA-256 hashes.
 - Each user's tracker data is stored under `neofit_data_<email>` — fully independent per person.
+- Weight/height logs live under `neofit_logs_<email>` (one entry per day, ~60 kept).
 - Families live under `neofit_families`: `{ id, name, code, members[] }`.
 - The signed-in session is per-tab (`sessionStorage`).
 - **Demo-grade auth**: there is no server; don't use real passwords you care about.
+
+## 🤖 Neo AI chat & API keys
+
+- **Zero keys in the code** — the repository contains no API keys, and none are required to run.
+- **Key-less mode (default)**: Neo answers from the bundled knowledge bases (`kb.js`) using client-side TF-IDF retrieval. Costs nothing, works offline.
+- **🔑 Use your own API key**: tap the key button in the chat header and paste a free Gemini key from [aistudio.google.com/apikey](https://aistudio.google.com/apikey). Chats then go to Gemini **on your own quota**, so a shared key can never be exhausted. The key is stored only in your browser (`neofit_gemini_key`) and sent directly to Google — never to any Neo Fit server.
+- **Safety**: emergency phrases (chest pain, heavy bleeding, reduced fetal movement, …) skip the AI entirely and return a fixed "contact your doctor" response. Pregnant users search the Pregnancy collection first; everyone gets the General collection.
 
 ## 👨‍👩‍👧‍👦 Family Hub
 

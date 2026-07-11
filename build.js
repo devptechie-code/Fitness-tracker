@@ -10,27 +10,26 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  */
 
 const htmlPath = path.join(__dirname, 'public', 'index.html');
-const cssPath = path.join(__dirname, 'public', 'styles.css');
-const jsPath = path.join(__dirname, 'public', 'app.js');
 const outPath = path.join(__dirname, 'dist', 'NeoFit.html');
 
 try {
-  // Read files
   let html = fs.readFileSync(htmlPath, 'utf-8');
-  const css = fs.readFileSync(cssPath, 'utf-8');
-  const js = fs.readFileSync(jsPath, 'utf-8');
 
-  // Inline CSS: replace <link rel="stylesheet" href="styles.css"> with <style>
-  html = html.replace(
-    '<link rel="stylesheet" href="styles.css">',
-    `<style>\n${css}\n</style>`
-  );
+  // Inline the local stylesheet (handles both "styles.css" and "/styles.css")
+  html = html.replace(/<link rel="stylesheet" href="\/?styles\.css">/, () => {
+    const css = fs.readFileSync(path.join(__dirname, 'public', 'styles.css'), 'utf-8');
+    return `<style>\n${css}\n</style>`;
+  });
 
-  // Inline JS: replace <script src="app.js"></script> with <script>
-  html = html.replace(
-    '<script src="app.js"></script>',
-    `<script>\n${js}\n</script>`
-  );
+  // Inline every local script tag (kb.js, chat.js, app.js, …) in order
+  html = html.replace(/<script src="\/?([\w-]+\.js)"><\/script>/g, (_, file) => {
+    const js = fs.readFileSync(path.join(__dirname, 'public', file), 'utf-8');
+    return `<script>\n${js}\n</script>`;
+  });
+
+  if (html.includes('src="/') || /href="\/?styles\.css"/.test(html)) {
+    throw new Error('Some local assets were not inlined — check the tags in index.html.');
+  }
 
   // Ensure dist directory exists
   const distDir = path.join(__dirname, 'dist');

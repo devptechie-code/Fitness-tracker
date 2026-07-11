@@ -161,7 +161,7 @@ header{
 .cal-bar{height:12px;border-radius:99px;background:color-mix(in srgb,var(--primary) 10%,transparent);
   overflow:hidden;margin:8px 0 16px;display:flex}
 .cal-seg{height:100%;transition:width .6s cubic-bezier(.22,.9,.3,1)}
-.cal-seg.b{background:#F59E0B}.cal-seg.l{background:var(--primary)}.cal-seg.d{background:var(--accent)}
+.cal-seg.b{background:#F59E0B}.cal-seg.l{background:var(--primary)}.cal-seg.d{background:var(--accent)}.cal-seg.s{background:#8B5CF6}
 .meal{border-top:1px solid color-mix(in srgb,var(--text-soft) 18%,transparent);padding:12px 0}
 .meal-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .meal-title{display:flex;align-items:center;gap:9px;font-weight:700;font-size:.95rem}
@@ -205,12 +205,12 @@ header{
 
 /* toast + confetti */
 #toast{
-  position:fixed;bottom:26px;left:50%;transform:translate(-50%,80px);
+  position:fixed;bottom:26px;left:26px;transform:translateY(80px);
   background:var(--text);color:var(--bg);padding:13px 22px;border-radius:99px;
   font-weight:600;font-size:.9rem;box-shadow:0 10px 30px rgba(0,0,0,.25);
   transition:transform .4s cubic-bezier(.22,.9,.3,1);z-index:100;pointer-events:none;
 }
-#toast.show{transform:translate(-50%,0)}
+#toast.show{transform:translateY(0)}
 .confetti{position:fixed;top:-12px;border-radius:3px;pointer-events:none;z-index:99;
   animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:.2}}
@@ -564,3 +564,110 @@ footer{text-align:center;color:var(--text-soft);font-size:.8rem;padding:20px}
   .field-row{flex-direction:column;gap:0}
   .auth-card{padding:22px 18px}
 }
+
+/* ===================================================================
+   HEALTH SNAPSHOT — measurement log (left) + improvement panel (right)
+   =================================================================== */
+.snap-flex{display:flex;gap:16px;margin-top:18px;align-items:stretch}
+.snap-log{flex:1 1 52%;min-width:0}
+.snap-log h4,.snap-delta h4{font-family:var(--font-display);font-size:.95rem;margin-bottom:4px}
+.snap-log .hint{margin-bottom:10px}
+.snap-log .field-row{margin-bottom:10px}
+.btn.wide{width:100%}
+.snap-delta{
+  flex:1 1 48%;min-width:170px;border-radius:14px;padding:14px 16px;
+  background:color-mix(in srgb,var(--accent) 8%,transparent);
+  border:1.5px dashed color-mix(in srgb,var(--accent) 40%,transparent);
+}
+.delta-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:.92rem}
+.delta-row .delta-lbl{color:var(--text-soft)}
+.delta-row .delta-val{margin-left:auto;font-weight:700;white-space:nowrap}
+.delta-row.good .delta-val{color:#15803D}
+.delta-row.watch .delta-val{color:#DC2626}
+.delta-row.flat .delta-val{opacity:.55}
+@media (max-width:640px){.snap-flex{flex-direction:column}}
+
+/* ===================================================================
+   NEO — AI health chat (RAG over kb.js; optional bring-your-own key)
+   =================================================================== */
+.neo-fab{
+  position:fixed;bottom:24px;right:24px;z-index:60;
+  width:58px;height:58px;border-radius:50%;border:none;cursor:pointer;
+  background:var(--primary);color:#fff;font-size:1.5rem;
+  box-shadow:0 10px 28px rgba(0,0,0,.28);
+  transition:transform .18s ease;
+}
+.neo-fab:hover{transform:translateY(-3px) scale(1.05)}
+.neo-panel{
+  position:fixed;bottom:24px;right:24px;z-index:60;
+  width:min(360px,calc(100vw - 32px));max-height:min(540px,calc(100vh - 48px));
+  display:flex;flex-direction:column;
+  background:var(--surface);color:var(--text);border-radius:18px;
+  box-shadow:0 18px 50px rgba(0,0,0,.3);overflow:hidden;
+}
+.neo-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px;background:var(--primary);color:#fff;
+}
+.neo-title{font-family:var(--font-display);font-weight:700;font-size:.95rem}
+.neo-head-btns{display:flex;gap:4px}
+.neo-hbtn{
+  background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:8px;
+  width:30px;height:30px;cursor:pointer;font-size:.9rem;
+}
+.neo-hbtn:hover{background:rgba(255,255,255,.32)}
+.neo-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;min-height:180px}
+.neo-msg{
+  max-width:85%;padding:9px 13px;border-radius:14px;font-size:.9rem;line-height:1.45;
+  white-space:pre-wrap;word-wrap:break-word;
+}
+.neo-msg.bot{background:color-mix(in srgb,var(--primary) 10%,var(--surface));border-bottom-left-radius:4px;align-self:flex-start}
+.neo-msg.user{background:var(--primary);color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+.neo-msg.guardrail{background:#FEE2E2;color:#7F1D1D;font-weight:600}
+.neo-msg.typing{opacity:.55;font-weight:700;letter-spacing:2px}
+.neo-input{display:flex;gap:8px;padding:10px 12px;border-top:1.5px solid color-mix(in srgb,var(--text) 8%,transparent)}
+.neo-input input{
+  flex:1;min-width:0;border-radius:99px;padding:10px 14px;font-size:.9rem;
+  border:1.5px solid color-mix(in srgb,var(--primary) 25%,transparent);
+  background:var(--surface);color:var(--text);
+}
+.neo-input button{
+  width:42px;border-radius:50%;border:none;background:var(--primary);color:#fff;
+  font-size:1rem;cursor:pointer;
+}
+.neo-input button:disabled{opacity:.5;cursor:wait}
+.neo-note{font-size:.72rem;color:var(--text-soft);padding:0 14px 10px;margin:0}
+.neo-byok{padding:10px 14px;border-top:1.5px solid color-mix(in srgb,var(--text) 8%,transparent)}
+.neo-byok[hidden]{display:none}
+.neo-byok-title{font-family:var(--font-display);font-weight:700;font-size:.88rem;margin-bottom:4px}
+.neo-byok-note{font-size:.76rem;color:var(--text-soft);line-height:1.45;margin-bottom:8px}
+.neo-byok-row{display:flex;gap:6px}
+.neo-byok-row input{
+  flex:1;min-width:0;border-radius:10px;padding:8px 10px;font-size:.82rem;
+  border:1.5px solid color-mix(in srgb,var(--primary) 30%,transparent);
+  background:var(--surface);color:var(--text);
+}
+
+.delta-latest{
+  display:flex;flex-direction:column;gap:2px;margin-bottom:8px;padding-bottom:8px;
+  border-bottom:1.5px dashed color-mix(in srgb,var(--accent) 35%,transparent);
+  font-size:.95rem;
+}
+.delta-latest .delta-date{font-size:.78rem;color:var(--text-soft);font-weight:600}
+.delta-since{font-size:.78rem;color:var(--text-soft);font-weight:600;margin:2px 0 4px}
+
+/* Sign in with Google */
+.gsi-area{margin-top:14px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.gsi-area[hidden]{display:none}
+.gsi-btn{display:flex;justify-content:center;min-height:44px}
+.auth-or{
+  width:100%;display:flex;align-items:center;gap:10px;color:var(--text-soft);
+  font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;
+}
+.auth-or::before,.auth-or::after{content:"";flex:1;height:1.5px;background:color-mix(in srgb,var(--text) 12%,transparent)}
+.gsi-note{
+  margin:12px 0 4px;padding:10px 12px;border-radius:12px;font-size:.85rem;
+  background:color-mix(in srgb,#15803D 10%,transparent);
+  border:1.5px solid color-mix(in srgb,#15803D 35%,transparent);
+}
+.gsi-note[hidden]{display:none}

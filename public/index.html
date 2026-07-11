@@ -56,6 +56,10 @@
       <p class="form-error" id="signinError" role="alert"></p>
       <button class="btn wide" type="submit">Sign in</button>
     </form>
+    <div class="gsi-area" id="gsiSigninArea" hidden>
+      <div class="auth-or" aria-hidden="true">or</div>
+      <div class="gsi-btn" id="gsiSigninBtn"></div>
+    </div>
     <p class="auth-switch">New to Neo Fit? <button class="linklike" id="toSignup">Create an account</button></p>
   </div>
 </main>
@@ -65,6 +69,11 @@
   <div class="auth-card wizard">
     <h2>Create your account</h2>
     <p class="auth-sub">A quick questionnaire so we can personalise your goals.</p>
+    <div class="gsi-area" id="gsiSignupArea" hidden>
+      <div class="gsi-btn" id="gsiSignupBtn"></div>
+      <div class="auth-or" aria-hidden="true">or fill in below</div>
+    </div>
+    <p class="gsi-note" id="gsiSignupNote" hidden>✅ Signed in with Google as <b id="gsiSignupEmail"></b> — just finish the health questionnaire.</p>
 
     <ol class="steps" aria-hidden="true">
       <li class="step-dot" data-step="1">1</li>
@@ -166,6 +175,11 @@
             <input type="tel" id="ecPhone" maxlength="20" placeholder="e.g. +44 7700 900123" required>
           </div>
         </div>
+        <div class="field">
+          <label for="ecEmail">Doctor's or guardian's email</label>
+          <input type="email" id="ecEmail" autocomplete="off" placeholder="doctor@clinic.com" required>
+          <p class="field-hint">Your vital details are emailed here when you press "Send details to doctor" on the dashboard.</p>
+        </div>
       </fieldset>
 
       <p class="form-error" id="signupError" role="alert"></p>
@@ -233,6 +247,29 @@
           <div class="stat-lbl">TDEE — your daily calorie target</div>
         </div>
       </div>
+
+      <div class="snap-flex">
+        <form class="snap-log" id="snapLogForm" aria-label="Log today's weight and height">
+          <h4>📝 Log today's measurements</h4>
+          <p class="hint">Height counts too — kids grow, posture changes.</p>
+          <div class="field-row">
+            <div class="field">
+              <label for="snapWeight">Weight (kg)</label>
+              <input type="number" id="snapWeight" min="15" max="350" step="0.1" placeholder="e.g. 62.4" required>
+            </div>
+            <div class="field">
+              <label for="snapHeight">Height (cm)</label>
+              <input type="number" id="snapHeight" min="80" max="250" step="0.1" placeholder="e.g. 165" required>
+            </div>
+          </div>
+          <button class="btn wide" type="submit">Save today's log</button>
+        </form>
+        <div class="snap-delta" id="snapDelta" aria-label="Improvement since your last log">
+          <h4 id="snapDeltaTitle">📈 Since your last log</h4>
+          <div id="snapDeltaBody"><p class="hint">Save a log two different days to see your progress here.</p></div>
+        </div>
+      </div>
+
       <div class="quote" id="bmiNote"></div>
     </section>
 
@@ -310,7 +347,7 @@
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h18M5 11a7 7 0 0 1 14 0M12 4V2M12 15v7M8 19h8"/></svg>
           <span id="calLabel">Calorie counter</span>
         </h3>
-        <span class="badge" id="calBadge">3 meals</span>
+        <span class="badge" id="calBadge">3 meals + snacks</span>
       </div>
       <div class="cal-summary">
         <span class="big" id="calTotal">0</span>
@@ -320,6 +357,7 @@
         <div class="cal-seg b" id="segB" style="width:0%"></div>
         <div class="cal-seg l" id="segL" style="width:0%"></div>
         <div class="cal-seg d" id="segD" style="width:0%"></div>
+        <div class="cal-seg s" id="segS" style="width:0%"></div>
       </div>
       <div id="meals"></div>
     </section>
@@ -351,6 +389,8 @@
         <span class="badge">On file</span>
       </div>
       <p class="ec-line" id="ecLine">–</p>
+      <button class="btn wide" id="sendDoctorBtn" style="margin-top:12px">📤 Send details to doctor</button>
+      <p class="hint" id="sendDoctorStatus" role="status" style="margin-top:8px"></p>
     </section>
   </div>
 </main>
@@ -465,13 +505,16 @@
 
 <aside class="vita-bubble" id="vitaBubble" hidden aria-live="polite">
   <button class="vita-close" id="vitaClose" aria-label="Dismiss assistant message">✕</button>
-  <div class="who">💬 Vita — your health buddy</div>
+  <div class="who">💬 Neo — your health buddy</div>
   <p id="vitaMsg"></p>
 </aside>
 
 <div id="toast" role="status" aria-live="polite"></div>
 <footer>Neo Fit · goals reset each day · each account keeps its own tracker</footer>
 
+<script src="/kb.js"></script>
+<script src="/chat.js"></script>
 <script src="/app.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>

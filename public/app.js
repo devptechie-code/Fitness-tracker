@@ -108,13 +108,26 @@ const DEFAULT_TOKENS = {
   "--radius":"18px",
 };
 
+/* ---------- Integrations (fill in your own — see SETUP_INTEGRATIONS.md) ----------
+   MAKE_WEBHOOK_URL: your Make.com custom-webhook URL. "Send details to doctor"
+   POSTs the user's vitals there; your Make scenario emails them onward.
+   GOOGLE_CLIENT_ID: an OAuth Web client ID from console.cloud.google.com,
+   with http://localhost:3000 (and your deploy origin) as authorized origins.
+   Leave either blank to hide/disable that feature. These are public
+   identifiers/endpoints, not secrets — no API keys live in this code. */
+const MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/t4rihr52do1lbsdrhd7xhwnhzf1oo2fm";
+const GOOGLE_CLIENT_ID = "";
+
 /* ---------- Default goals ---------- */
 const GOALS = { water: 5, steps: 8000 };
 const MEALS = [
   { id: "breakfast", label: "Breakfast", dot: "#F59E0B" },
   { id: "lunch",     label: "Lunch",     dot: "" /* set to primary at render */ },
   { id: "dinner",    label: "Dinner",    dot: "" /* accent */ },
+  { id: "snack",     label: "Snacks",    dot: "#8B5CF6" },
 ];
+/* The daily meal goal counts the three main meals — snacks are a bonus. */
+const CORE_MEALS = MEALS.filter(m => m.id !== "snack");
 
 /* =====================================================================
    HEALTH ENGINE — BMI, healthy weight range, BMR, TDEE, workout targets
@@ -271,7 +284,7 @@ function freshState() {
   return {
     water: 0,
     steps: 0,
-    meals: { breakfast: [], lunch: [], dinner: [] },
+    meals: { breakfast: [], lunch: [], dinner: [], snack: [] },
     extras: {}, // category bonus goals checked today, by goal id
     celebrated: { water: false, steps: false, meals: false },
   };
@@ -279,7 +292,11 @@ function freshState() {
 function loadState(email) {
   try {
     const saved = JSON.parse(localStorage.getItem(dataKey(email)));
-    if (saved && typeof saved.water === "number") return { ...freshState(), ...saved };
+    if (saved && typeof saved.water === "number") {
+      const merged = { ...freshState(), ...saved };
+      merged.meals.snack ||= []; // states saved before snacks existed
+      return merged;
+    }
   } catch { /* corrupt → fresh */ }
   return freshState();
 }
@@ -340,7 +357,7 @@ function vitaDashMsg() {
   const u = currentUser;
   if (!u) return "";
   const n = u.name.split(" ")[0];
-  const mealsCount = MEALS.filter(m => state.meals[m.id].length > 0).length;
+  const mealsCount = CORE_MEALS.filter(m => state.meals[m.id].length > 0).length;
   const met = (state.water >= GOALS.water ? 1 : 0) + (state.steps >= GOALS.steps ? 1 : 0) + (mealsCount === 3 ? 1 : 0);
   const left = 3 - met;
   const stepsGap = GOALS.steps - state.steps;
@@ -369,7 +386,7 @@ function renderGoals() {
   const core = [
     { done: state.water >= GOALS.water, label: `Drink ${GOALS.water} glasses of water 💧` },
     { done: state.steps >= GOALS.steps, label: `Walk ${fmt(GOALS.steps)} steps 👟` },
-    { done: MEALS.every(m => state.meals[m.id].length > 0), label: "Log breakfast, lunch & dinner 🍽️" },
+    { done: CORE_MEALS.every(m => state.meals[m.id].length > 0), label: "Log breakfast, lunch & dinner 🍽️" },
   ];
   const extras = PERSONAS[personaFor(currentUser)].extraGoals || [];
   const done = core.filter(c => c.done).length + extras.filter(x => state.extras[x.id]).length;
@@ -410,6 +427,8 @@ function goSignin() {
   $("signOutBtn").hidden = true;
   $("topNav").hidden = true;
   showVita("");
+  pendingGoogle = null;
+  if (typeof unmountNeoChat === "function") unmountNeoChat();
   showPage("page-signin");
 }
 
@@ -418,6 +437,7 @@ function goSignup() {
   setWizardStep(1);
   syncPregField();
   syncParentField();
+  if (typeof applyGooglePrefill === "function") applyGooglePrefill();
   showVita("");
   showPage("page-signup");
 }
@@ -448,9 +468,11 @@ function goDash() {
   renderCatChips();
 
   renderHealth();
+  renderSnapshotLog();
   renderPlan();
   renderAll();
   showVita(vitaDashMsg());
+  if (typeof mountNeoChat === "function") mountNeoChat();
 }
 
 /* Category / role chips under the greeting */
@@ -513,6 +535,72 @@ function signIn(user) {
   goDash();
   toast(`Welcome, ${user.name.split(" ")[0]}!`);
 }
+
+/* =====================================================================
+   SIGN IN WITH GOOGLE — Google Identity Services (GIS)
+   Requires GOOGLE_CLIENT_ID (see SETUP_INTEGRATIONS.md); the button stays
+   hidden until it's configured. Google verifies the email and returns a
+   signed ID token; we read the profile from it client-side.
+   ===================================================================== */
+let pendingGoogle = null; // {email, name} while a new Google user finishes signup
+
+function decodeJwtPayload(credential) {
+  const b64 = credential.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+  return JSON.parse(decodeURIComponent(escape(atob(b64))));
+}
+
+function onGoogleCredential(response) {
+  let p;
+  try { p = decodeJwtPayload(response.credential); }
+  catch { toast("Google sign-in failed — could not read the response."); return; }
+  if (!p.email || p.email_verified === false) { toast("Google did not verify that email."); return; }
+
+  const email = p.email.toLowerCase();
+  const existing = loadUsers()[email];
+  if (existing) {
+    signIn(existing);
+    return;
+  }
+  // New user: Google covers identity; they still complete the health wizard.
+  pendingGoogle = { email, name: p.name || email.split("@")[0] };
+  goSignup();
+  toast("Almost there — finish the questionnaire to create your tracker.");
+}
+
+function applyGooglePrefill() {
+  const on = !!pendingGoogle;
+  $("gsiSignupNote").hidden = !on;
+  $("gsiSignupArea").hidden = on || !GOOGLE_CLIENT_ID || !window.google?.accounts;
+  $("suName").value = on ? pendingGoogle.name : $("suName").value;
+  $("suEmail").value = on ? pendingGoogle.email : $("suEmail").value;
+  $("suEmail").readOnly = on;
+  if (on) {
+    $("gsiSignupEmail").textContent = pendingGoogle.email;
+    // Password is Google's job now; satisfy the form with a random one.
+    const rand = crypto.getRandomValues(new Uint32Array(4)).join("-");
+    $("suPassword").value = rand;
+  }
+  $("suPassword").closest(".field").hidden = on;
+}
+
+function initGoogleSignIn() {
+  if (!GOOGLE_CLIENT_ID) return; // not configured — buttons stay hidden
+  let tries = 0;
+  const timer = setInterval(() => {
+    if (!window.google?.accounts?.id) {
+      if (++tries > 50) clearInterval(timer); // GSI script never loaded (offline?)
+      return;
+    }
+    clearInterval(timer);
+    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: onGoogleCredential });
+    for (const id of ["gsiSigninBtn", "gsiSignupBtn"]) {
+      google.accounts.id.renderButton($(id), { theme: "outline", size: "large", width: 280 });
+    }
+    $("gsiSigninArea").hidden = false;
+    $("gsiSignupArea").hidden = false;
+  }, 200);
+}
+initGoogleSignIn();
 
 /* =====================================================================
    SIGN UP — 4-step questionnaire wizard
@@ -617,11 +705,13 @@ $("signupForm").addEventListener("submit", async e => {
     activity: $("suActivity").value,
     other: $("suOther").value.trim(),
     parentEmail: age < MINOR_AGE ? $("suParentEmail").value.trim().toLowerCase() : null,
+    googleAuth: !!pendingGoogle, // account created via Sign in with Google
     familyId: null,
     emergency: {
       name: $("ecName").value.trim(),
       relation: $("ecRelation").value.trim(),
       phone: $("ecPhone").value.trim(),
+      email: $("ecEmail").value.trim().toLowerCase(),
     },
     created: new Date().toISOString(),
   };
@@ -641,6 +731,7 @@ $("signupForm").addEventListener("submit", async e => {
   users[email] = user;
   saveUsers(users);
   $("signupForm").reset();
+  pendingGoogle = null;
   signIn(user);
   toast("Account created — welcome to Neo Fit! 🎉");
 });
@@ -689,12 +780,191 @@ function renderPlan() {
     `<li><strong>${k}</strong><span>${v}</span></li>`).join("");
 }
 
+/* ---------- Body log: weight & height over time (height changes too!) ----------
+   One entry per day, stored per account. The snapshot card shows the change
+   since the previous log on its right-hand side. */
+const logsKey = email => `neofit_logs_${email}`;
+
+function loadLogs(email) {
+  try { return JSON.parse(localStorage.getItem(logsKey(email))) || []; }
+  catch { return []; }
+}
+function saveLogs(email, logs) { localStorage.setItem(logsKey(email), JSON.stringify(logs)); }
+
+function saveBodyLog(weightKg, heightCm) {
+  const logs = loadLogs(currentUser.email);
+  const today = new Date().toISOString().split("T")[0];
+  const entry = { date: today, weightKg, heightCm };
+  if (logs.length && logs[logs.length - 1].date === today) logs[logs.length - 1] = entry;
+  else logs.push(entry);
+  if (logs.length > 60) logs.shift(); // keep ~2 months
+  saveLogs(currentUser.email, logs);
+
+  // Keep the profile in sync so BMI / TDEE / family cards stay fresh.
+  currentUser.weightKg = weightKg;
+  currentUser.heightCm = heightCm;
+  updateUser(currentUser);
+}
+
+function renderSnapshotLog() {
+  const u = currentUser;
+  $("snapWeight").value = u.weightKg || "";
+  $("snapHeight").value = u.heightCm || "";
+
+  const logs = loadLogs(u.email);
+  const body = $("snapDeltaBody");
+
+  // The saved log always shows immediately, date first.
+  const latestLine = l => `<div class="delta-latest">
+    <span class="delta-date">🗓️ ${l.date}</span>
+    <b>${l.weightKg} kg · ${l.heightCm} cm · BMI ${bmiOf(l.weightKg, l.heightCm).toFixed(1)}</b>
+  </div>`;
+
+  if (!logs.length) {
+    $("snapDeltaTitle").textContent = "📈 Your log";
+    body.innerHTML = `<p class="hint">Save a log and it will appear here right away.</p>`;
+    return;
+  }
+  if (logs.length === 1) {
+    $("snapDeltaTitle").textContent = "📈 Latest log";
+    body.innerHTML = latestLine(logs[0]) +
+      `<p class="hint">Log again another day to see your improvement here.</p>`;
+    return;
+  }
+
+  const latest = logs[logs.length - 1];
+  const prev = logs[logs.length - 2];
+  const dW = latest.weightKg - prev.weightKg;
+  const dH = latest.heightCm - prev.heightCm;
+  const dB = bmiOf(latest.weightKg, latest.heightCm) - bmiOf(prev.weightKg, prev.heightCm);
+
+  // Which direction counts as improvement: weight depends on where the BMI
+  // sat; height up is growth for under-18s; BMI mirrors the weight rule.
+  const prevBmi = bmiOf(prev.weightKg, prev.heightCm);
+  const weightGood = u.age >= 18 ? (prevBmi > 25 ? "down" : prevBmi < 18.5 ? "up" : null) : null;
+  const heightGood = u.age < 18 ? "up" : null;
+
+  const row = (icon, label, delta, unit, goodWhen) => {
+    const dir = delta > 0.049 ? "up" : delta < -0.049 ? "down" : "flat";
+    const arrow = dir === "up" ? "▲" : dir === "down" ? "▼" : "▬";
+    const cls = dir === "flat" || !goodWhen ? "flat" : dir === goodWhen ? "good" : "watch";
+    const txt = dir === "flat" ? "no change"
+      : `${delta > 0 ? "+" : ""}${(Math.round(delta * 10) / 10).toLocaleString("en-US")} ${unit}`.trim();
+    return `<div class="delta-row ${cls}">
+      <span aria-hidden="true">${icon}</span><span class="delta-lbl">${label}</span>
+      <span class="delta-val">${arrow} ${txt}</span></div>`;
+  };
+
+  $("snapDeltaTitle").textContent = "📈 Latest log";
+  body.innerHTML =
+    latestLine(latest) +
+    `<div class="delta-since">Since your last log (${prev.date}):</div>` +
+    row("⚖️", "Weight", dW, "kg", weightGood) +
+    row("📏", "Height", dH, "cm", heightGood) +
+    row("🧮", "BMI", dB, "", weightGood);
+}
+
+$("snapLogForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const w = Number($("snapWeight").value);
+  const h = Number($("snapHeight").value);
+  if (!w || w < 15 || w > 350) { toast("Enter a weight between 15 and 350 kg"); return; }
+  if (!h || h < 80 || h > 250) { toast("Enter a height between 80 and 250 cm"); return; }
+  saveBodyLog(w, h);
+  renderHealth();
+  renderSnapshotLog();
+  toast("Measurements logged 📝");
+});
+
 function renderEmergency() {
   const ec = currentUser.emergency;
   $("ecLine").innerHTML =
     `<strong>${escapeHtml(ec.name)}</strong> (${escapeHtml(ec.relation)}) · ` +
-    `<a href="tel:${escapeHtml(ec.phone.replace(/[^\d+]/g, ""))}">${escapeHtml(ec.phone)}</a>`;
+    `<a href="tel:${escapeHtml(ec.phone.replace(/[^\d+]/g, ""))}">${escapeHtml(ec.phone)}</a>` +
+    (ec.email ? ` · 📧 ${escapeHtml(ec.email)}` : "");
 }
+
+/* ---------- "Send details to doctor" → Make.com webhook → email ----------
+   POSTs the signed-in user's vitals to your Make.com scenario, which forwards
+   them to the doctor/guardian email captured at sign-up. */
+function vitalsPayload() {
+  const u = currentUser;
+  const bmi = bmiOf(u.weightKg, u.heightCm);
+  const tdee = calGoalOf(u);
+  const mealsCount = CORE_MEALS.filter(m => state.meals[m.id].length > 0).length;
+  const kcal = MEALS.reduce((s, m) => s + (state.meals[m.id] || []).reduce((a, f) => a + f.kcal, 0), 0);
+  const logs = loadLogs(u.email).slice(-7);
+  return {
+    sent_at: new Date().toISOString(),
+    patient_name: u.name,
+    patient_email: u.email,
+    age: u.age,
+    sex: u.sex,
+    category: categoryOf(u).label,
+    pregnant: !!u.pregnant,
+    weight_kg: u.weightKg,
+    height_cm: u.heightCm,
+    bmi: +bmi.toFixed(1),
+    bmi_category: u.age >= 18 ? bmiCategory(bmi) : "still growing (under 18)",
+    tdee_kcal: tdee,
+    today: {
+      water_glasses: `${state.water}/${GOALS.water}`,
+      steps: state.steps,
+      meals_logged: `${mealsCount}/3`,
+      calories_kcal: kcal,
+    },
+    recent_logs: logs, // [{date, weightKg, heightCm}] — up to last 7
+    other_info: u.other || "",
+    emergency_contact: u.emergency,
+    doctor_email: u.emergency.email,
+  };
+}
+
+async function sendVitalsToDoctor() {
+  const status = $("sendDoctorStatus");
+
+  // Older accounts signed up before this field existed.
+  if (!currentUser.emergency.email) {
+    const email = prompt("No doctor/guardian email on file yet.\nEnter the email your vitals should be sent to:");
+    if (!email || !email.includes("@")) { status.textContent = "No valid email — nothing sent."; return; }
+    currentUser.emergency.email = email.trim().toLowerCase();
+    updateUser(currentUser);
+    renderEmergency();
+  }
+  if (!MAKE_WEBHOOK_URL) {
+    status.textContent = "⚠️ Not configured: paste your Make.com webhook URL into MAKE_WEBHOOK_URL in app.js (see SETUP_INTEGRATIONS.md).";
+    return;
+  }
+
+  const btn = $("sendDoctorBtn");
+  btn.disabled = true;
+  status.textContent = "Sending your vitals…";
+  try {
+    const res = await fetch(MAKE_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(vitalsPayload()),
+    });
+    if (!res.ok) throw new Error(`webhook answered ${res.status}`);
+    status.textContent = `✅ Sent to ${currentUser.emergency.email} via Make.com.`;
+    toast("Details sent to your doctor 📤");
+  } catch (e) {
+    // A CORS-opaque failure can still mean Make accepted it; retry blind.
+    try {
+      await fetch(MAKE_WEBHOOK_URL, {
+        method: "POST", mode: "no-cors",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(vitalsPayload()),
+      });
+      status.textContent = "📨 Dispatched to Make.com (delivery not confirmable from the browser — check the scenario run).";
+    } catch {
+      status.textContent = "❌ Could not reach the Make.com webhook: " + e.message;
+    }
+  } finally {
+    btn.disabled = false;
+  }
+}
+$("sendDoctorBtn").addEventListener("click", sendVitalsToDoctor);
 
 /* =====================================================================
    FAMILY HUB — consolidated view for authorized family members
@@ -706,7 +976,7 @@ function goFamily() {
 
 function todaySnapshot(email) {
   const d = loadState(email);
-  const mealsCount = MEALS.filter(m => d.meals[m.id].length > 0).length;
+  const mealsCount = CORE_MEALS.filter(m => d.meals[m.id].length > 0).length;
   const kcal = MEALS.reduce((s, m) => s + d.meals[m.id].reduce((a, f) => a + f.kcal, 0), 0);
   const goalsMet = (d.water >= GOALS.water ? 1 : 0) + (d.steps >= GOALS.steps ? 1 : 0) + (mealsCount === 3 ? 1 : 0);
   return { water: d.water, steps: d.steps, mealsCount, kcal, goalsMet };
@@ -1094,7 +1364,7 @@ function addFood(meal) {
   nameEl.value = ""; kcalEl.value = ""; nameEl.focus();
   renderCalories(); renderSummary(); saveState();
   toast(`${name} added to ${meal}`);
-  const loggedAll = MEALS.every(m => state.meals[m.id].length > 0);
+  const loggedAll = CORE_MEALS.every(m => state.meals[m.id].length > 0);
   if (loggedAll && !state.celebrated.meals) {
     state.celebrated.meals = true;
     saveState();
@@ -1107,19 +1377,20 @@ function mealTotal(meal) { return state.meals[meal].reduce((s, f) => s + f.kcal,
 
 function renderCalories() {
   const calGoal = currentUser ? calGoalOf(currentUser) : 2000;
-  const totals = { breakfast: mealTotal("breakfast"), lunch: mealTotal("lunch"), dinner: mealTotal("dinner") };
-  const total = totals.breakfast + totals.lunch + totals.dinner;
+  const totals = { breakfast: mealTotal("breakfast"), lunch: mealTotal("lunch"), dinner: mealTotal("dinner"), snack: mealTotal("snack") };
+  const total = totals.breakfast + totals.lunch + totals.dinner + totals.snack;
   $("calTotal").textContent = fmt(total);
   const cap = Math.max(total, calGoal);
   $("segB").style.width = (totals.breakfast / cap * 100) + "%";
   $("segL").style.width = (totals.lunch / cap * 100) + "%";
   $("segD").style.width = (totals.dinner / cap * 100) + "%";
+  $("segS").style.width = (totals.snack / cap * 100) + "%";
 
   const prim = getComputedStyle(document.documentElement).getPropertyValue("--primary");
   const acc  = getComputedStyle(document.documentElement).getPropertyValue("--accent");
   document.querySelectorAll("[data-meal-dot]").forEach(d => {
     const id = d.dataset.mealDot;
-    d.style.background = id === "breakfast" ? "#F59E0B" : id === "lunch" ? prim : acc;
+    d.style.background = id === "breakfast" ? "#F59E0B" : id === "lunch" ? prim : id === "snack" ? "#8B5CF6" : acc;
   });
 
   MEALS.forEach(m => {
@@ -1138,7 +1409,7 @@ function renderCalories() {
 function renderSummary() {
   const waterDone = state.water >= GOALS.water;
   const stepsDone = state.steps >= GOALS.steps;
-  const mealsCount = MEALS.filter(m => state.meals[m.id].length > 0).length;
+  const mealsCount = CORE_MEALS.filter(m => state.meals[m.id].length > 0).length;
   const mealsDone = mealsCount === 3;
 
   $("ckWater").classList.toggle("on", waterDone);
