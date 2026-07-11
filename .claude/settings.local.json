@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(\\(Get-Content package-lock.json -Raw\\) -replace 'vitacircle-fitness-tracker', 'neofit-fitness-tracker' | Set-Content package-lock.json -Encoding utf8; Remove-Item \"dist\\\\VitaCircle.html\" -Force -Confirm:$false; node build.js)",
+      "Read(//c/Program Files/**)",
+      "Read(//c/Users/RafiaQasim-LFLConsul/AppData/Local/Programs/**)",
+      "Bash(command -v python python3 py)",
+      "Read(//c/Users/RafiaQasim-LFLConsul/AppData/Local/Microsoft/WindowsApps/**)",
+      "PowerShell(powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\RAFIAQ~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-RafiaQasim-LFLConsul-OneDrive---Law-Firm-Limited-Desktop-vitacircle-code\\\\ee9bf3f9-7514-44cf-b0b0-73bbdcd88b08\\\\scratchpad\\\\serve.ps1\")",
+      "Bash(mkdir -p dist)",
+      "Bash(awk ' *)"
+    ]
+  }
+}
